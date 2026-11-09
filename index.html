@@ -96,7 +96,9 @@ img{max-width:100%}
 .dot{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 3px rgba(61,220,132,.2)}
 .dot.off{background:#f5b83d;box-shadow:0 0 0 3px rgba(245,184,61,.2)}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
-@media(min-width:760px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
+@media(min-width:760px){.tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}}
+.t-new{background:linear-gradient(140deg,#4fd1e8,#1597b8 55%,#0b6a8c)}
+@media(max-width:759px){.tiles .tile.t-new{grid-column:1/-1;min-height:0;flex-direction:row;align-items:center;gap:14px;padding:14px}.tiles .tile.t-new .cnt{margin-top:0;order:3;margin-left:auto;padding-left:6px}.tiles .tile.t-new .txt{min-width:0;flex:1}}
 .tile{position:relative;overflow:hidden;text-align:left;border-radius:20px;padding:16px 14px 14px;min-height:150px;color:#fff;
   box-shadow:0 18px 40px -16px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;display:flex;flex-direction:column}
 .tile:hover{transform:translateY(-4px)}
@@ -130,6 +132,8 @@ img{max-width:100%}
 .ti-id{background:linear-gradient(135deg,#38bdf8,#2563eb);color:#fff}
 .ti-pay{background:linear-gradient(135deg,#34d399,#059669);color:#fff}
 .ti-rc{background:linear-gradient(135deg,#fbbf24,#ea580c);color:#fff}
+.admin-grid.two-col{grid-template-columns:1fr}
+@media(min-width:640px){.admin-grid.two-col{grid-template-columns:repeat(2,1fr)}}
 .notice{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(245,184,61,.14);border:1px solid rgba(245,184,61,.4);color:#ffe3a3;font-size:13.5px}
 .foot{margin:34px 0 26px;text-align:center;color:var(--ink3);font-size:12px;line-height:1.7}
 
@@ -411,6 +415,10 @@ img{max-width:100%}
         <div class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></div>
         <div class="cnt" id="c-expired">—</div><div class="lab">കാലാവധി കഴിഞ്ഞവ</div><div class="sub" id="s-expired">Expired</div>
       </button>
+      <button class="tile t-new" data-grp="new">
+        <div class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>
+        <div class="cnt" id="c-new">—</div><div class="txt"><div class="lab">പുതിയ അംഗങ്ങൾ</div><div class="sub" id="s-new">New Members</div></div>
+      </button>
     </div>
 
     <button class="wide-btn glass" id="btnNewMsg">
@@ -419,9 +427,15 @@ img{max-width:100%}
       <svg class="ico chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
     </button>
 
+    <button class="wide-btn glass" id="btnReceipt">
+      <div class="ti ti-rc"><svg class="ico" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
+      <div><b>അംഗത്വ രസീത്</b><span>Membership Receipt · ക്യാമ്പയിൻ ടീമിന് · PNG, PDF, WhatsApp</span></div>
+      <svg class="ico chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+    </button>
+
     <div id="adminArea" class="hidden">
       <div class="section-title">Admin</div>
-      <div class="admin-grid">
+      <div class="admin-grid two-col">
         <button class="wide-btn glass" data-act="card">
           <div class="ti ti-id"><svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M14 10h5M14 14h4"/></svg></div>
           <div><b>അംഗത്വ ID കാർഡ്</b><span>Member ID Card · photo, PNG, PDF</span></div>
@@ -429,10 +443,6 @@ img{max-width:100%}
         <button class="wide-btn glass" data-act="pay">
           <div class="ti ti-pay"><svg class="ico" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></div>
           <div><b>പുതിയ പേയ്മെന്റ്</b><span>New Payment Entry</span></div>
-        </button>
-        <button class="wide-btn glass" data-act="receipt">
-          <div class="ti ti-rc"><svg class="ico" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
-          <div><b>അംഗത്വ രസീത്</b><span>Membership Receipt · PNG, PDF, share</span></div>
         </button>
       </div>
     </div>
@@ -3328,7 +3338,7 @@ var DEF = {API_URL:'',REGISTRATION_LINK:'https://forms.gle/Jvm5kpf6p3uDbaABA',OR
   BANK_ACCOUNT_NO:'40238101075931',BANK_IFSC:'KLGB0040238',BANK_BRANCH:'Kerala Gramin Bank, Chokkad'};
 var CFG = Object.assign({}, DEF, window.CKD_CONFIG || {});
 var S = { members:[], full:false, settings:{renewalYear:2027,feeY12:2000,feeY3:1000}, pin:null, updated:null,
-          hasEmail:false, photos:{}, grp:'all', pickAct:null, actNo:null, mobHits:null, loadedAt:0 };
+          hasEmail:false, photos:{}, detail:{}, grp:'all', pickAct:null, actNo:null, mobHits:null, loadedAt:0 };
 var CACHE_KEY = 'ckd_members_public_v1';
 
 function apiReady(){ return /^https:\/\/script\.google(usercontent)?\.com\//.test(CFG.API_URL || ''); }
@@ -3376,8 +3386,11 @@ function classify(m){
 }
 var GRP = {
   all:{ml:'ആകെ അംഗങ്ങൾ', en:'Total Members'}, valid:{ml:'സാധുവായവ', en:'Valid'},
-  expiring:{ml:'ഉടൻ തീരുന്നവ', en:'Expiring Soon'}, expired:{ml:'കാലാവധി കഴിഞ്ഞവ', en:'Expired'}
+  expiring:{ml:'ഉടൻ തീരുന്നവ', en:'Expiring Soon'}, expired:{ml:'കാലാവധി കഴിഞ്ഞവ', en:'Expired'},
+  'new':{ml:'പുതിയ അംഗങ്ങൾ', en:'New Members'}
 };
+function newSince(){ return new Date(S.settings.renewalYear, 0, 1); }
+function isNew(m){ var f = pISO(m.from); return !m.excl && !!f && f >= newSince(); }
 var CHIP = {valid:'സാധു', expiring:'ഉടൻ തീരും', expired:'കാലഹരണം', excl:'ഒഴിവാക്കി'};
 var EXCL_ML = {deceased:'നിര്യാതനായി', suspended:'സസ്‌പെൻഡ് ചെയ്തു', discontinued:'അംഗത്വം തുടരുന്നില്ല', decision:'എക്സിക്യൂട്ടീവ് തീരുമാനം കാത്തിരിക്കുന്നു', other:'ഒഴിവാക്കി'};
 
@@ -3464,13 +3477,13 @@ function route(){
   if (!p) return show('home');
   if (p === 'dash') { show('dash'); renderDash(); if (Date.now() - S.loadedAt > 120000) loadMembers(true); return; }
   if (p === 'list') { S.grp = GRP[parts[1]] ? parts[1] : 'all'; show('list'); $('listSearch').value = ''; S.mobHits = null; renderList(); return; }
-  if (p === 'card' || p === 'pay' || p === 'receipt') {
+  if (p === 'receipt') { show('rcPage'); openReceipt(Number(parts[1])); return; }
+  if (p === 'card' || p === 'pay') {
     if (!S.pin) { go('#/dash'); return; }
     var m = byNo(parts[1]);
     if (!m) { go('#/dash'); toast('അംഗത്തെ കണ്ടെത്താനായില്ല'); return; }
     if (p === 'card') { show('cardPage'); renderCard(m); }
     if (p === 'pay') { show('payPage'); renderPay(m); }
-    if (p === 'receipt') { show('rcPage'); renderReceipt(m); }
     return;
   }
   show('home');
@@ -3489,11 +3502,12 @@ function rerender(){
 $('btnEnter').onclick = function(){ go('#/dash'); };
 $('brandHome').onclick = function(){ go('#/dash'); };
 $('btnBack').onclick = function(){ if (history.length > 1) history.back(); else go('#/dash'); };
-$('btnRefresh').onclick = function(){ loadMembers(false).then(function(){ if (/^#\/(card|pay|receipt)/.test(location.hash)) route(); }); };
+$('btnRefresh').onclick = function(){ S.detail = {}; loadMembers(false).then(function(){ if (/^#\/(card|pay|receipt)/.test(location.hash)) route(); }); };
 
 function counts(){
   var c = {all:0, valid:0, expiring:0, expired:0, excl:0, rows:S.members.length};
-  S.members.forEach(function(m){ var k = classify(m); if (k === 'excl') c.excl++; else { c.all++; c[k]++; } });
+  c['new'] = 0;
+  S.members.forEach(function(m){ var k = classify(m); if (k === 'excl') c.excl++; else { c.all++; c[k]++; if (isNew(m)) c['new']++; } });
   return c;
 }
 
@@ -3508,11 +3522,12 @@ function renderDash(){
   if (!S.members.length) { tl.classList.add('skel'); return; }
   tl.classList.remove('skel');
   var c = counts(), T = fmtD(target());
-  $('c-all').textContent = c.all; $('c-valid').textContent = c.valid; $('c-expiring').textContent = c.expiring; $('c-expired').textContent = c.expired;
+  $('c-all').textContent = c.all; $('c-valid').textContent = c.valid; $('c-expiring').textContent = c.expiring; $('c-expired').textContent = c.expired; $('c-new').textContent = c['new'];
   $('s-all').textContent = 'Total Members · ' + c.rows + ' − ' + c.excl + ' ഒഴിവാക്കിയവ';
   $('s-valid').textContent = 'Valid · ' + T + ' വരെയോ ശേഷമോ';
   $('s-expiring').textContent = 'Expiring · ' + T + '-ന് മുമ്പ്';
   $('s-expired').textContent = 'Expired · ഇന്നിന് മുമ്പ്';
+  $('s-new').textContent = 'New Members · ' + fmtD(newSince()) + ' മുതൽ അംഗത്വം ആരംഭിച്ചവർ';
   $('adminArea').classList.toggle('hidden', !S.pin);
 }
 
@@ -3550,9 +3565,10 @@ function renderList(){
   $('listTitle').textContent = GRP[g].ml;
   var T = fmtD(target());
   var SUBS = {valid:' · ' + T + ' വരെയോ അതിനുശേഷമോ സാധുതയുള്ളവർ', expiring:' · ഇന്ന് മുതൽ ' + T + '-ന് മുമ്പ് തീരുന്നവർ',
-    expired:' · സാധുത ഇന്നിന് മുമ്പ് അവസാനിച്ചവർ', all:' · ഒഴിവാക്കിയ അക്കൗണ്ടുകൾ ഇല്ലാതെ'};
+    expired:' · സാധുത ഇന്നിന് മുമ്പ് അവസാനിച്ചവർ', all:' · ഒഴിവാക്കിയ അക്കൗണ്ടുകൾ ഇല്ലാതെ',
+    'new':' · ' + fmtD(newSince()) + ' മുതൽ അംഗത്വം ആരംഭിച്ചവർ'};
   $('listSub').textContent = GRP[g].en + SUBS[g];
-  var arr = S.members.filter(function(m){ var k = classify(m); return k !== 'excl' && (g === 'all' || k === g); });
+  var arr = S.members.filter(function(m){ var k = classify(m); return k !== 'excl' && (g === 'all' || (g === 'new' ? isNew(m) : k === g)); });
   $('listCount').textContent = arr.length;
   var shown = arr.filter(function(m){ return matches(m, q); }).sort(function(a, b){ return a.no - b.no; });
   var el = $('mlist');
@@ -3575,7 +3591,7 @@ $('listSearch').addEventListener('input', function(){
 });
 $('mlist').addEventListener('click', function(e){
   var r = e.target.closest('.mrow'); if (!r) return;
-  if (!S.pin) return;
+  if (!S.pin) { go('#/receipt/' + r.dataset.no); return; }
   openActions(Number(r.dataset.no));
 });
 
@@ -3666,7 +3682,8 @@ function lockAdmin(forced){
   S.members = S.members.map(function(m){ return {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl}; });
   S.full = false;
   setAdminUI(); closeM('mAct');
-  if (/^#\/(card|pay|receipt)/.test(location.hash)) go('#/dash'); else rerender();
+  S.detail = {};
+  if (/^#\/(card|pay)/.test(location.hash)) go('#/dash'); else if (/^#\/receipt/.test(location.hash)) route(); else rerender();
   toast(forced ? 'PIN സ്വീകരിച്ചില്ല — അഡ്മിൻ ലോക്ക് ചെയ്തു' : 'അഡ്മിൻ ലോക്ക് ചെയ്തു 🔒');
 }
 function setAdminUI(){
@@ -3678,18 +3695,27 @@ function setAdminUI(){
 
 /* member picker */
 var PICK_T = {card:'ID കാർഡ് · Member ID Card', pay:'പുതിയ പേയ്മെന്റ് · New Payment', receipt:'രസീത് · Receipt'};
+function openPicker(act){
+  S.pickAct = act; $('pickSub').textContent = PICK_T[act];
+  $('pickSearch').value = ''; renderPick(); openM('mPick'); setTimeout(function(){ $('pickSearch').focus(); }, 250);
+}
+$('btnReceipt').onclick = function(){ openPicker('receipt'); };
 Array.prototype.forEach.call(document.querySelectorAll('#adminArea [data-act]'), function(b){
-  b.onclick = function(){
-    S.pickAct = b.dataset.act; $('pickSub').textContent = PICK_T[S.pickAct];
-    $('pickSearch').value = ''; renderPick(); openM('mPick'); setTimeout(function(){ $('pickSearch').focus(); }, 250);
-  };
+  b.onclick = function(){ openPicker(b.dataset.act); };
 });
 function renderPick(){
   var q = $('pickSearch').value.trim();
   var arr = S.members.filter(function(m){ return matches(m, q); }).sort(function(a, b){ return a.no - b.no; });
   $('pickList').innerHTML = (q ? arr : arr.slice(0, 40)).map(rowHTML).join('') || '<div class="empty">No members found</div>';
 }
-$('pickSearch').addEventListener('input', renderPick);
+var pickTimer;
+$('pickSearch').addEventListener('input', function(){
+  S.mobHits = null; renderPick();
+  var d = digits(this.value); clearTimeout(pickTimer);
+  if (!S.full && d.length >= 6 && apiReady()) pickTimer = setTimeout(function(){
+    api('findMobile', {q:d}).then(function(j){ S.mobHits = j.nos; renderPick(); }).catch(function(){});
+  }, 450);
+});
 $('pickList').addEventListener('click', function(e){
   var r = e.target.closest('.mrow'); if (!r) return;
   closeM('mPick'); go('#/' + S.pickAct + '/' + r.dataset.no);
@@ -4029,7 +4055,7 @@ $('payForm').onsubmit = function(e){
       .then(function(j){
         var nm = j.member, idx = S.members.indexOf(m);
         if (idx >= 0) S.members[idx] = nm; else S.members.push(nm);
-        curPay = nm;
+        curPay = nm; delete S.detail[nm.no];
         try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (c) { c.members = c.members.map(function(x){ return x.no === nm.no ? {no:nm.no,name:nm.name,house:nm.house,location:nm.location,mob4:nm.mob4,from:nm.from,upto:nm.upto,excl:nm.excl} : x; }); localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } } catch(e2){}
         $('doneBody').innerHTML = '<div class="kv"><div><small>രസീത് നമ്പർ · Receipt No.</small><b style="font-size:20px;color:#ffd77e">' + esc(j.receiptNo) + '</b></div>' +
           '<div><small>പുതിയ സാധുത · Valid up to</small><b style="font-size:18px">' + fmtD(nm.upto) + '</b></div>' +
@@ -4093,6 +4119,20 @@ function overdueText(u){
 }
 
 var curRc = null;
+function openReceipt(no){
+  var m = byNo(no);
+  if (m && m.payments) { renderReceipt(m); return; }
+  if (S.detail[no]) { renderReceipt(S.detail[no]); return; }
+  $('rcInner').innerHTML = ''; $('rcChecks').innerHTML = ''; $('rcStage').style.height = '120px';
+  $('rcSub').textContent = m ? m.name + ' · #' + m.no : '#' + no;
+  if (!apiReady()) { toast('Apps Script URL is not set'); return; }
+  busy(true, 'രസീത് വിവരങ്ങൾ ലോഡ് ചെയ്യുന്നു…');
+  api('memberDetail', S.pin ? {no:no, pin:S.pin} : {no:no})
+    .then(function(j){ if (j.settings) S.settings = j.settings; S.detail[no] = j.member;
+      if (location.hash === '#/receipt/' + no) renderReceipt(j.member); })
+    .catch(function(e){ toast('ലോഡ് ചെയ്യാനായില്ല · ' + e.message, 4000); })
+    .then(function(){ busy(false); });
+}
 function receiptHTML(m){
   var pays = m.payments || [], seq = pays.length, rno = m.no + '/' + seq3(seq), code = 'CKD-' + m.no + '-' + seq3(seq);
   var k = classify(m), u = pISO(m.upto), T = target();
@@ -4191,8 +4231,8 @@ function renderReceipt(m){
   curRc = m;
   var seq = (m.payments || []).length;
   $('rcSub').textContent = m.name + ' · #' + m.no + ' · രസീത് ' + m.no + '/' + seq3(seq);
-  var w = dataChecks(m);
-  $('rcChecks').innerHTML = w.length
+  var w = S.pin ? dataChecks(m) : [];
+  $('rcChecks').innerHTML = !S.pin ? '' : w.length
     ? '<div class="checks"><b>⚠️ രജിസ്റ്റർ പരിശോധന · Register check (' + w.length + ')</b> — രസീതിൽ ഉൾപ്പെടില്ല<ul>' + w.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>'
     : '<div class="checks ok">✓ രജിസ്റ്റർ പരിശോധന: പൊരുത്തക്കേടുകളൊന്നുമില്ല · No inconsistencies found</div>';
   document.fonts.load('700 30px "Anek Malayalam"').then(function(){
