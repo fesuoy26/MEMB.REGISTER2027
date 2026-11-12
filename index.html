@@ -3513,7 +3513,7 @@ function applyData(j){
   S.contact = !!j.contact || !!j.full;
   if (!j.full) {
     /* the offline cache never keeps mobile numbers */
-    var pub = (j.members || []).map(function(m){ return {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl}; });
+    var pub = (j.members || []).map(function(m){ return {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl,feeRate:m.feeRate}; });
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({members:pub, settings:j.settings, updated:j.updated})); } catch(e){}
   }
 }
@@ -3737,6 +3737,27 @@ function markSent(no, k){ var m = sentMap(); m[no] = {d: toISO(today()), k: k}; 
 function sentInfo(m){ var x = sentMap()[m.no]; return x && x.k === classify(m) ? x : null; }   /* a status change resets the marker */
 function senderName(){ try { return localStorage.getItem(SENDER_KEY) || ''; } catch(e){ return ''; } }
 
+/* ---- due amounts for the message (same tier rules as the receipt: year 1–2 / year 3+ × fee rate) ---- */
+function monthsSpan(start, end){                 /* whole months from start up to and including end (part month counts as 1) */
+  var e1 = addDays(end, 1), n = monthsBetween(start, e1);
+  if (addMonths(start, n) < e1) n++;
+  return Math.max(0, n);
+}
+function dueSplit(m){
+  /* total period = from the day after "valid up to" until 31-12 of the renewal year, in whole months;
+     split into arrears (up to 31-12 of the previous year) and the renewal-year part */
+  var RY = S.settings.renewalYear, rate = m.feeRate === 0.5 ? 0.5 : 1;
+  var u = pISO(m.upto), start = u ? addDays(u, 1) : (pISO(m.from) || today());
+  var T = target(), arrEnd = new Date(RY - 1, 11, 31);
+  var totM = start <= T ? monthsSpan(start, T) : 0;
+  var arrM = start <= arrEnd ? Math.min(totM, monthsSpan(start, arrEnd)) : 0;
+  var renStart = addMonths(start, arrM), renM = totM - arrM;
+  var total = totM ? feeFor(m, start, totM, rate) : 0;          /* same calculation as the receipt */
+  var arrears = arrM ? feeFor(m, start, arrM, rate) : 0;
+  return {rate: rate, start: start, arrears: arrears, arrMonths: arrM, renewal: total - arrears, renMonths: renM, renStart: renStart,
+          months: totM, total: total};
+}
+
 /* ---- personalised message for a current member ---- */
 function memberMsg(m, sender){
   var k = classify(m), u = pISO(m.upto), T = fmtD(target()), up = u ? fmtD(u) : '—';
@@ -3747,11 +3768,20 @@ function memberMsg(m, sender){
   if (k === 'expired') {
     L.push('🔴 നില: *കാലാവധി കഴിഞ്ഞു*' + (u ? ' (' + overdueText(u) + ' മുമ്പ്)' : ''), '',
       'നിങ്ങളുടെ അംഗത്വ കാലാവധി ' + (u ? up + '-ന് ' : '') + 'അവസാനിച്ചിരിക്കുന്നു. ദയവായി *എത്രയും വേഗം* അംഗത്വ ഫീസ് അടച്ച് അംഗത്വം പുതുക്കുക. ⏳',
-      'സാധുവായ അംഗത്വമുള്ളവർക്ക് മാത്രമേ കൂട്ടായ്മയുടെ ക്ഷേമ-സുരക്ഷാ പദ്ധതികളുടെ ആനുകൂല്യങ്ങൾ ലഭിക്കുകയുള്ളൂ.', '',
+      'സാധുവായ അംഗത്വമുള്ളവർക്ക് മാത്രമേ കൂട്ടായ്മയുടെ ക്ഷേമ-സുരക്ഷാ പദ്ധതികളുടെ ആനുകൂല്യങ്ങൾ ലഭിക്കുകയുള്ളൂ.', '');
+    var dx = dueSplit(m), RYx = S.settings.renewalYear;
+    L.push('💰 *അടയ്ക്കേണ്ട തുക:*');
+    if (dx.arrears) L.push('▪️ ' + (RYx - 1) + ' വരെയുള്ള കുടിശ്ശിക (' + fmtD(dx.start) + ' – ' + fmtD(addDays(dx.renStart, -1)) + ', ' + mlMonths(dx.arrMonths) + '): *' + inr(dx.arrears) + '*');
+    if (dx.renewal) L.push('▪️ ' + RYx + ' പുതുക്കൽ (' + fmtD(dx.renStart) + ' – ' + T + ', ' + mlMonths(dx.renMonths) + '): *' + inr(dx.renewal) + '*');
+    L.push('✅ *ആകെ അടയ്ക്കേണ്ടത്: ' + inr(dx.total) + '*' + (dx.rate === 0.5 ? ' _(50% ഇളവ് ഉൾപ്പെടെ)_' : ''), '');
+    L.push(
       '💚 *നിങ്ങൾ എന്നും ഈ സ്നേഹക്കുടുംബത്തിന്റെ ഭാഗമായിരിക്കണം എന്നാണ് ഞങ്ങളുടെ ആഗ്രഹം.* അകലങ്ങളിലും ഒരുമിച്ചു നിൽക്കാൻ നിങ്ങളുടെ സാന്നിധ്യം ഞങ്ങൾക്ക് വിലപ്പെട്ടതാണ്.');
   } else if (k === 'expiring') {
     L.push('🟠 നില: *ഉടൻ പുതുക്കേണ്ടത്*', '',
-      'നിങ്ങളുടെ അംഗത്വം *' + up + '*-ന് അവസാനിക്കും. *അംഗത്വം പുതുക്കാൻ സമയമായി* — ' + T + ' വരെയുള്ള ഫീസ് അടച്ച് കൃത്യസമയത്ത് പുതുക്കുക. 🔔', '',
+      'നിങ്ങളുടെ അംഗത്വം *' + up + '*-ന് അവസാനിക്കും. *അംഗത്വം പുതുക്കാൻ സമയമായി* — ' + T + ' വരെയുള്ള ഫീസ് അടച്ച് കൃത്യസമയത്ത് പുതുക്കുക. 🔔', '');
+    var de = dueSplit(m);
+    L.push('💰 *പുതുക്കൽ തുക (' + fmtD(de.start) + ' – ' + T + ', ' + mlMonths(de.months) + '): ' + inr(de.total) + '*' + (de.rate === 0.5 ? ' _(50% ഇളവ് ഉൾപ്പെടെ)_' : ''), '');
+    L.push(
       '🤝 *നിങ്ങളുടെ പിന്തുണ ഞങ്ങൾക്ക് ആവശ്യമാണ്.* ഓരോ അംഗത്വവും ഒരു കുടുംബത്തിന് ആശ്വാസവും കൂട്ടായ്മയ്ക്ക് കരുത്തുമാണ്.');
   } else {
     L.push('🟢 നില: *സാധു*', '',
@@ -3948,7 +3978,7 @@ $('btnLock').onclick = function(){
 function teamSignOut(forced){
   S.team = null; S.contact = false; S.detail = {};
   try { localStorage.removeItem(TEAM_KEY); } catch(e){}
-  if (!S.pin) S.members = S.members.map(function(m){ return {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl}; });
+  if (!S.pin) S.members = S.members.map(function(m){ return {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl,feeRate:m.feeRate}; });
   setAdminUI(); rerender();
   toast(forced ? 'ടീം PIN മാറിയിട്ടുണ്ട് — പുതിയ PIN നൽകുക' : 'ടീം മോഡ് ഓഫ് ചെയ്തു', 3500);
 }
@@ -3972,7 +4002,7 @@ $('pinForm').onsubmit = function(e){
 function lockAdmin(forced){
   S.pin = null; S.photos = {};
   var keepMob = !!S.team;
-  S.members = S.members.map(function(m){ var x = {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl}; if (keepMob) x.mobile = m.mobile; return x; });
+  S.members = S.members.map(function(m){ var x = {no:m.no,name:m.name,house:m.house,location:m.location,mob4:m.mob4,from:m.from,upto:m.upto,excl:m.excl,feeRate:m.feeRate}; if (keepMob) x.mobile = m.mobile; return x; });
   S.full = false; S.role = keepMob ? 'team' : ''; S.contact = keepMob;
   setAdminUI(); closeM('mAct');
   S.detail = {};
@@ -4351,7 +4381,7 @@ $('payForm').onsubmit = function(e){
         var nm = j.member, idx = S.members.indexOf(m);
         if (idx >= 0) S.members[idx] = nm; else S.members.push(nm);
         curPay = nm; delete S.detail[nm.no];
-        try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (c) { c.members = c.members.map(function(x){ return x.no === nm.no ? {no:nm.no,name:nm.name,house:nm.house,location:nm.location,mob4:nm.mob4,from:nm.from,upto:nm.upto,excl:nm.excl} : x; }); localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } } catch(e2){}
+        try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (c) { c.members = c.members.map(function(x){ return x.no === nm.no ? {no:nm.no,name:nm.name,house:nm.house,location:nm.location,mob4:nm.mob4,from:nm.from,upto:nm.upto,excl:nm.excl,feeRate:nm.feeRate} : x; }); localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } } catch(e2){}
         $('doneBody').innerHTML = '<div class="kv"><div><small>രസീത് നമ്പർ · Receipt No.</small><b style="font-size:20px;color:#ffd77e">' + esc(j.receiptNo) + '</b></div>' +
           '<div><small>പുതിയ സാധുത · Valid up to</small><b style="font-size:18px">' + fmtD(nm.upto) + '</b></div>' +
           '<div><small>അംഗം</small><b>' + esc(nm.name) + '</b></div><div><small>തുക</small><b>' + inr(inrV) + '</b></div></div>';
